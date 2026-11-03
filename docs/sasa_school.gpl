@@ -1,0 +1,37 @@
+GIMP Palette
+Name: SASA School
+Columns: 4
+# Measured from 21 campus photos (1F, 2F, rooftop). Source of truth: SASA 교정 팔레트 design system.
+213 217 219	granite-100
+164 165 166	granite-300
+141 140 139	granite-500
+115 114 112	granite-700
+ 52  52  58	inlay-900
+216 222 228	wall-100
+181 188 197	wall-300
+154 158 163	wall-500
+198 154 114	wood-300
+166 128  98	wood-500
+134 101  75	wood-700
+ 83  56  34	wood-900
+223 192  92	pillar-300
+186 151  57	pillar-500
+135 106  25	pillar-700
+163 185  87	lime-300
+136 152  82	lime-500
+ 88  98  54	lime-700
+111 101 170	violet-300
+ 70  62 105	violet-500
+ 43  35  56	violet-700
+222 180 135	peach-300
+207 159 119	peach-500
+ 75 140 108	bench-500
+ 48  68  57	bench-700
+170 192 222	sky-100
+129 150 177	sky-300
+ 96 131 189	blue-500
+ 20  33  57	night-900
+  6   8  14	night-950
+189  45  67	bullet-red
+ 70  62 105	bullet-violet
+251 250 246	bullet-rim
