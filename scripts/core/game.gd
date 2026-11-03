@@ -33,6 +33,7 @@ var dev_god := false     # 무적: 전투에서 피해를 받지 않는다
 var dev_fast := false    # 빠르게 걷기 (2.5배)
 var dev_noclip := false  # 벽 통과
 var dev_info := false    # 화면 왼쪽 아래에 방 이름·칸 좌표·플래그 수 표시
+var dev_open := true     # 자유 이동: 모든 층 계단과 인증이 필요한 문이 열린다 (이야기 이벤트 없이 바로 이동)
 
 
 func _ready() -> void:
@@ -172,6 +173,7 @@ func set_dev(v: bool) -> void:
 		dev_fast = false
 		dev_noclip = false
 		dev_info = false
+	dev_open = true
 	var tc := get_node_or_null("/root/Touch")
 	if tc and tc.enabled:
 		tc._layout()

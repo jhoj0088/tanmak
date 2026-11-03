@@ -1,5 +1,6 @@
 extends Node2D
 ## 개발자 메뉴 (개발자 모드에서 필드에 있을 때 F1 또는 ` 키, 휴대폰은 '개발' 버튼)
+##   - 자유 이동 (기본 켜짐): 모든 층 계단이 열리고 이야기 없이 바로 오르내린다. 인증이 필요한 문도 열린다
 ##   - 방으로 이동 / 챕터로 건너뛰기 / 아무 적과 전투
 ##   - 무적 · 빠르게 걷기 · 벽 통과 · 정보 표시 (켜고 끄기)
 ##   - HP 가득 + 레벨 업, 논리·감성 +5, 모든 인증, 여기서 저장
@@ -99,6 +100,7 @@ func _show(p: String) -> void:
 	match p:
 		"main":
 			list = [
+				["자유 이동 (모든 층·문 열림): " + _onoff(Game.dev_open), "open"],
 				["방으로 이동...", "page:rooms"], ["챕터로 건너뛰기...", "page:chapters"], ["전투 시작...", "page:battles"],
 				["무적: " + _onoff(Game.dev_god), "god"], ["빠르게 걷기: " + _onoff(Game.dev_fast), "fast"],
 				["벽 통과: " + _onoff(Game.dev_noclip), "noclip"], ["정보 표시: " + _onoff(Game.dev_info), "info"],
@@ -139,6 +141,10 @@ func _pick(what: String) -> void:
 		main.battle(what.substr(7))
 		return
 	match what:
+		"open":
+			Game.dev_open = not Game.dev_open
+			if main.world:
+				main.world.queue_redraw()
 		"god":
 			Game.dev_god = not Game.dev_god
 		"fast":

@@ -133,7 +133,19 @@ func tile_at_point(p: Vector2) -> String:
 func door_blocked(d: Dictionary) -> bool:
 	if d.get("locked", false):
 		return true
+	if Game.dev and Game.dev_open:
+		return false
 	return d.has("need_flag") and not Game.flag(d["need_flag"])
+
+
+## 개발자 모드 자유 이동: 계단은 이야기 이벤트 없이 바로 위/아래층으로
+const DEV_STAIRS := {
+	"f1_hall": {"U": ["f2_hall", "from_down"]},
+	"f2_hall": {"U": ["f3_hall", "from_down"], "D": ["f1_hall", "from_up"]},
+	"f3_hall": {"U": ["f4_hall", "from_down"], "D": ["f2_hall", "from_up"]},
+	"f4_hall": {"U": ["f5_hall", "from_stairs"], "D": ["f3_hall", "from_up"]},
+	"f5_hall": {"D": ["f4_hall", "from_up"], "R": ["roof", "from_hall"]},
+}
 
 
 func is_solid_char(c: String) -> bool:
@@ -168,6 +180,11 @@ func check_door(feet: Vector2) -> bool:
 	if not doors.has(c):
 		return false
 	var d: Dictionary = doors[c]
+	if Game.dev and Game.dev_open and DEV_STAIRS.get(room_id, {}).has(c):
+		var dest: Array = DEV_STAIRS[room_id][c]
+		Snd.play("door")
+		main.goto_room(dest[0], dest[1])
+		return true
 	if d.has("event"):
 		player.position = player.last_safe
 		main.run_event(d["event"], d)
