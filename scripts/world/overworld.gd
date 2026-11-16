@@ -436,7 +436,7 @@ func _draw_night(ci: CanvasItem) -> void:
 					var o := Vector2(tx * TILE, ty * TILE + 20)
 					ci.draw_colored_polygon(PackedVector2Array([o + Vector2(4, 0), o + Vector2(28, 0), o + Vector2(52, 70), o + Vector2(20, 70)]), Color(P.PILLAR_300.lightened(0.4), 0.13))
 		return
-	ci.draw_rect(view, Color(P.NIGHT_900, 0.35))
+	ci.draw_rect(view, Color(P.NIGHT_900, 0.18))
 	var x0 := maxi(0, int(view.position.x / TILE) - 2)
 	var x1 := mini(w, int(view.end.x / TILE) + 2)
 	var vn := _vis()
@@ -447,21 +447,21 @@ func _draw_night(ci: CanvasItem) -> void:
 			var o2 := Vector2(tx * TILE, ty * TILE)
 			match c:
 				"w":
-					ci.draw_colored_polygon(PackedVector2Array([o2 + Vector2(4, 20), o2 + Vector2(28, 20), o2 + Vector2(44, 84), o2 + Vector2(16, 84)]), Color(P.SKY_100, 0.07))
+					ci.draw_colored_polygon(PackedVector2Array([o2 + Vector2(4, 20), o2 + Vector2(28, 20), o2 + Vector2(44, 84), o2 + Vector2(16, 84)]), Color(P.SKY_100, 0.16))
 				"E":
-					ci.draw_circle(o2 + Vector2(16, 10), 34, Color(P.BENCH_500.lightened(0.3), 0.06))
-					ci.draw_circle(o2 + Vector2(16, 10), 16, Color(P.BENCH_500.lightened(0.3), 0.07))
+					ci.draw_circle(o2 + Vector2(16, 10), 34, Color(P.BENCH_500.lightened(0.3), 0.12))
+					ci.draw_circle(o2 + Vector2(16, 10), 16, Color(P.BENCH_500.lightened(0.3), 0.18))
 				"v":
-					ci.draw_circle(o2 + Vector2(16, 6), 40, Color(P.PEACH_300, 0.07))
+					ci.draw_circle(o2 + Vector2(16, 6), 40, Color(P.PEACH_300, 0.16))
 				"c", "i":
-					ci.draw_circle(o2 + Vector2(16, 0), 22, Color(P.SKY_100, 0.05))
+					ci.draw_circle(o2 + Vector2(16, 0), 22, Color(P.SKY_100, 0.12))
 				"*":
-					ci.draw_circle(o2 + Vector2(16, 16), 26 + sin(t * 3.0) * 3.0, Color(P.PILLAR_300, 0.07))
+					ci.draw_circle(o2 + Vector2(16, 16), 26 + sin(t * 3.0) * 3.0, Color(P.PILLAR_300, 0.16))
 				"Q":
-					ci.draw_circle(o2 + Vector2(12, 4), 10, Color(P.BLUE_500, 0.08))
+					ci.draw_circle(o2 + Vector2(12, 4), 10, Color(P.BLUE_500, 0.18))
 			if doors.has(c) and doors[c].has("glow"):
 				var gc: Color = doors[c]["glow"]
-				gc.a = 0.08 + 0.04 * sin(t * 3.0)
+				gc.a = 0.16 + 0.06 * sin(t * 3.0)
 				ci.draw_circle(o2 + Vector2(16, 30), 30, gc)
 
 
