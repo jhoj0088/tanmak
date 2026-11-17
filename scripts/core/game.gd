@@ -265,6 +265,8 @@ func _setup_input() -> void:
 	_add_keys("dev", [KEY_F1, KEY_QUOTELEFT])
 	_add_keys("dev_spare", [KEY_F2])
 	_add_keys("dev_win", [KEY_F3])
+	_add_keys("dev_next", [KEY_F4])   # 필드: 다음 단계 / 이야기: 대사 건너뛰기 / 전투: 바로 끝내기
+	_add_keys("dev_prev", [KEY_F5])   # 필드: 이전 단계
 
 
 func _add_keys(action: String, keys: Array) -> void:

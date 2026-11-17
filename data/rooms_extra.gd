@@ -67,6 +67,8 @@ const ROOMS := {
 			"floor": "2F",
 			"pos": [59, 18],
 		},
+		"bg": "res://assets/rooms/a2_cafeteria.png",
+		"bg_oy": 64,
 	},
 
 	"a2_gym": {
@@ -131,6 +133,8 @@ const ROOMS := {
 			"floor": "2F",
 			"pos": [59, 18],
 		},
+		"bg": "res://assets/rooms/a2_gym.png",
+		"bg_oy": 64,
 	},
 
 	"a4_music": {
@@ -185,6 +189,8 @@ const ROOMS := {
 			"floor": "4F",
 			"pos": [63, 25],
 		},
+		"bg": "res://assets/rooms/a4_music.png",
+		"bg_oy": 64,
 	},
 
 	"a5_art": {
@@ -262,6 +268,8 @@ const ROOMS := {
 			"floor": "5F",
 			"pos": [63, 25],
 		},
+		"bg": "res://assets/rooms/a5_art.png",
+		"bg_oy": 64,
 	},
 
 	"bio_4": {
@@ -416,6 +424,8 @@ const ROOMS := {
 		"where": {
 			"floor": "DORM",
 		},
+		"bg": "res://assets/rooms/dorm_laundry.png",
+		"bg_oy": 64,
 	},
 
 	"dorm_study": {
@@ -481,6 +491,8 @@ const ROOMS := {
 		"where": {
 			"floor": "DORM",
 		},
+		"bg": "res://assets/rooms/dorm_study.png",
+		"bg_oy": 64,
 	},
 
 	"epi_hall": {
@@ -857,7 +869,7 @@ const ROOMS := {
 			"##########################################################################.....naaaaaaaaaaaaaann........####",
 			"##########################################################################.....nnnnnnnnnnnnnnnnnnn......####",
 			"########################===2bb====w==}=b=w====]=w=b=!=$w=====bw======w==b=p...J...................J....p####",
-			"########################................................................................................####",
+			"########################................................ll...........l..................................####",
 			"#######################=................................................................................####",
 			"######################=.p...............................................................................####",
 			"####################=>....LL<LQLLLL{LLLLL[LLLLL)LLLLL4LLLLL(LLQLL55LLLL&LLLLL0LLLLLLLLLLLLLQLLLLLLLLLLL#####",
@@ -901,6 +913,7 @@ const ROOMS := {
 			"start": [51, 14, 0],
 		},
 		"theme": "school",
+		"bg": "res://assets/halls/f5_hall.png",
 		"plates": [[72, 46, "← S동"], [74, 31, "A동 ↖"], [24, 49, "수학 강의실 ↙"]],
 		"where": {
 			"floor": "5F",
@@ -1195,6 +1208,8 @@ const ROOMS := {
 		"where": {
 			"floor": "OUT",
 		},
+		"bg": "res://assets/rooms/parcel_room.png",
+		"bg_oy": 64,
 	},
 
 	"server_2": {

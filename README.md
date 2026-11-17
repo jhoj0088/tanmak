@@ -11,6 +11,7 @@ Godot 4.3 이상. **Chapter 1~6과 엔딩 3종(노멀/배드/트루)** 까지 �
    - 대사·퀴즈: `story/ch1.gd` ~ `story/ch6.gd`, `story/extra.gd` (`say([...])`, `choose(...)` 안의 문장)
    - 보스 대사·탄막·퀴즈: `scripts/battle/enemies/*.gd` (예: BJ KIM은 `owl.gd`, 천문 선생은 `astro.gd`)
    - 맵: `tools/world.py` 를 고치고 `python3 tools/world.py` 를 실행하면 `data/rooms_*.gd` 가 다시 만들어진다. (`data/rooms_*.gd` 를 직접 고치면 다음 생성 때 덮어써진다.)
+     이어서 `python3 tools/render_halls.py` 로 복도·교실 배경 그림(`assets/halls/*.png`, `assets/rooms/*.png`)을 다시 그린다. (numpy, Pillow 필요)
    - 대사가 너무 길거나 맵 줄이 안 맞는지 검사: `godot --headless -s tools/check_text.gd`
    - 색: `scripts/art/palette.gd` (우리 학교 사진에서 잰 'SASA 교정 팔레트'). 학교 타일·조명·화면 UI가 여기 색을 쓴다. 새 색을 직접 적지 말고 `P.이름`으로 쓴다. 다른 세계(숲·세포·암실·서버)와 캐릭터·탄막 색은 따로 정해져 있다.
 4. 게임 진행 공략: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) / 기획: [docs/GDD.md](docs/GDD.md) / 사진 촬영 가이드: [docs/PHOTO_GUIDE.md](docs/PHOTO_GUIDE.md)
@@ -30,6 +31,7 @@ Godot 4.3 이상. **Chapter 1~6과 엔딩 3종(노멀/배드/트루)** 까지 �
 | Z / Enter / Space | 조사·대화·확인 |
 | X / Backspace | 취소, 대사 빨리 넘기기, **전투 중 폭탄**(집중 게이지 절반 소모) |
 | C / Esc | 메뉴 (스탯, 가방, 지금 할 일) |
+| M / Tab | 큰 지도 (층 안내도: 들어갈 수 있는 교실 이름, 불이 새는 곳, 계단. ↑↓로 다른 층) |
 | Shift (전투 중) | 저속 정밀 이동 + 피격 판정 표시 |
 
 타이틀 화면의 **난이도**에서 '쉬움'(받는 피해 절반)을 고를 수 있다.
@@ -64,7 +66,9 @@ scripts/
   art/art.gd           캐릭터 그림 (코드로 그림)
   mobile/              휴대폰 터치 조작 (패드, 버튼, 화면 배치)
 assets/                폰트, 음악
-tools/                 world.py(★ 모든 맵 생성: 5층 시설 안내도 모양의 복도·교실·옥상, 미니맵 평면), make_music.py(음악 생성), check_text.gd(대사·맵 검사)
+tools/                 world.py(★ 모든 맵 생성: 5층 시설 안내도 모양의 복도·교실·옥상, 미니맵 평면), render_halls.py(★ 복도·교실 배경 그림),
+                       make_music.py(음악 생성), check_text.gd(대사·맵 검사)
+assets/halls, rooms/   복도 1~5층과 실내 교실의 배경 그림 (render_halls.py 가 그린다)
 ```
 
 ## 고치는 법
@@ -73,6 +77,9 @@ tools/                 world.py(★ 모든 맵 생성: 5층 시설 안내도 모
 한 문장은 대화창 3줄(약 60자)까지. 넘으면 실행 중에 경고가 뜬다.
 
 **맵을 바꾸고 싶다** → `tools/world.py` 를 고치고 `python3 tools/world.py` (data/rooms_*.gd 를 다시 쓴다. 줄 길이·문 연결·스폰 위치도 검사한다).
+그다음 `python3 tools/render_halls.py` 로 배경 그림을 다시 그린다. 복도 1~5층과 실내 교실은 이 그림(학교 사진을 보고 그린 3/4 시점: 위쪽 벽은 높이 72px로 면이 보이고,
+A동·수학 구역은 매끈한 사선 벽, 중앙 홀은 아래층이 내려다보이는 세모 아트리움)을 깔고, 게임은 그 위에 사람·명패·밤 조명·움직이는 것만 그린다.
+그림의 색과 모양은 `tools/render_halls.py` 안의 함수(벽 면, 문, 기둥, 사물함, 책상...)를 고치면 된다. 옥상·운동장·정원·던전은 지금처럼 `scripts/world/tiles.gd` 가 칸마다 그린다.
 글자 하나가 타일 하나이고 뜻은 `scripts/world/tiles.gd` 맨 위에 있다. 방마다 `"where"` 가 오른쪽 위 미니맵의 위치를 정한다.
 
 **새 이벤트** → `story/` 의 파일에 함수를 추가한다.
@@ -115,6 +122,8 @@ NPC를 특정 챕터에만 세우려면 actor에 `"chapter": [최소, 최대]`.
 - **개발자 모드**: 타이틀의 '개발자 모드'를 켜거나 `-- dev` 로 실행하면, 필드에서 F1(또는 `)로 개발자 메뉴가 열린다.
   방 이동, 챕터 건너뛰기, 아무 적과 전투, 무적·빠르게 걷기·벽 통과·정보 표시, 논리·감성 올리기, 모든 인증, 저장.
   **자유 이동**(기본 켜짐): 모든 층·옥상 계단과 인증으로 잠긴 문이 열리고, 계단은 이야기 없이 바로 위/아래층으로 간다.
+  **진행 단계**: 이야기를 35단계(프롤로그 ~ 최종전)로 나눠 아무 단계로나 간다. 필드에서 F4 = 다음 단계, F5 = 이전 단계.
+  이야기 중 F4 = 남은 대사 건너뛰기, 전투 중 F4 = 전투 바로 끝내기(살려 줌). 실행 인자 `-- step=12` 로 12단계에서 시작. (scripts/ui/dev_steps.gd)
   전투 중 F2 = 바로 살려 줄 수 있게, F3 = 적 HP 1. (scripts/ui/dev_menu.gd)
 
 - 실행 인자 `-- room=forest_2` (또는 `room=f5_hall@from_math` 로 스폰까지) : 그 방에서 바로 시작 / `-- battle=owl` : 그 적과 바로 전투

@@ -52,6 +52,8 @@ const ROOMS := {
 			"floor": "1F",
 			"pos": [63, 25],
 		},
+		"bg": "res://assets/rooms/a1_principal.png",
+		"bg_oy": 64,
 	},
 
 	"a2_server": {

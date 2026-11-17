@@ -53,6 +53,8 @@ const ROOMS := {
 			"floor": "3F",
 			"pos": [95, 31],
 		},
+		"bg": "res://assets/rooms/a3_robot.png",
+		"bg_oy": 64,
 	},
 
 	"s3_library": {
@@ -127,6 +129,8 @@ const ROOMS := {
 			"floor": "3F",
 			"pos": [65, 49],
 		},
+		"bg": "res://assets/rooms/s3_library.png",
+		"bg_oy": 64,
 	},
 
 }

@@ -29,7 +29,7 @@ func _list() -> Array:
 
 func _process(_delta: float) -> void:
 	if not open:
-		if Input.is_action_just_pressed("menu") and not main.is_busy() and not main.dialogue.active and main.world:
+		if Input.is_action_just_pressed("menu") and not main.is_busy() and not main.dialogue.active and main.world and not main.minimap.big:
 			open = true
 			sel = 0
 			note = ""

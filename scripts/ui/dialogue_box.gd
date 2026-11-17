@@ -86,6 +86,16 @@ func _process(delta: float) -> void:
 	queue_redraw()
 	if not active or Engine.get_process_frames() == open_frame:
 		return
+	# 개발자 모드: F4 = 남은 대사를 한꺼번에 넘긴다 (선택지에서는 지금 고른 것으로 정한다)
+	if Game.dev and Input.is_action_just_pressed("dev_next"):
+		active = false
+		_cooldown()
+		if choosing:
+			choosing = false
+			chosen.emit(sel)
+		else:
+			done.emit()
+		return
 	if choosing:
 		if Input.is_action_just_pressed("move_up"):
 			sel = (sel - 1 + options.size()) % options.size()

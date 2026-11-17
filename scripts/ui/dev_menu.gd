@@ -4,11 +4,15 @@ extends Node2D
 ##   - 방으로 이동 / 챕터로 건너뛰기 / 아무 적과 전투
 ##   - 무적 · 빠르게 걷기 · 벽 통과 · 정보 표시 (켜고 끄기)
 ##   - HP 가득 + 레벨 업, 논리·감성 +5, 모든 인증, 여기서 저장
-## 전투 중에는 F2 = 지금 바로 살려 줄 수 있게, F3 = 적 HP 1 (battle.gd 의 _dev_keys)
+##   - 진행 단계: 이야기를 한 단계씩 고르거나 넘긴다 (scripts/ui/dev_steps.gd)
+## 단축키: 필드에서 F4 = 다음 단계, F5 = 이전 단계
+##         이야기 중 F4 = 남은 대사 건너뛰기 (선택지는 지금 고른 것으로)
+##         전투 중 F2 = 지금 바로 살려 줄 수 있게, F3 = 적 HP 1, F4 = 전투 바로 끝내기 (battle.gd 의 _dev_keys)
 ## 개발자 모드 자체는 타이틀 화면의 '개발자 모드' 또는 실행 인자 `-- dev` 로 켠다.
 const P = preload("res://scripts/art/palette.gd")
 const Rooms = preload("res://data/rooms.gd")
 const Enemies = preload("res://scripts/battle/enemies.gd")
+const Steps = preload("res://scripts/ui/dev_steps.gd")
 
 ## 챕터로 건너뛰기: [이름, 챕터 번호, 켜 둘 플래그(앞 챕터 것까지 누적), 방, 스폰]
 const CHAPTERS := [
@@ -43,9 +47,14 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	queue_redraw()
 	if not open:
-		if Game.dev and Input.is_action_just_pressed("dev") and main.world and not main.is_busy() \
-				and not main.dialogue.active and not main.menu.open:
+		var free: bool = Game.dev and main.world != null and not main.is_busy() and not main.dialogue.active \
+				and not main.menu.open and main.battle_node == null and not main.minimap.big
+		if free and Input.is_action_just_pressed("dev"):
 			_open()
+		elif free and Input.is_action_just_pressed("dev_next"):
+			goto_step(Steps.current() + 1)
+		elif free and Input.is_action_just_pressed("dev_prev"):
+			goto_step(Steps.current() - 1)
 		return
 	if Engine.get_process_frames() == open_frame:
 		return
@@ -101,6 +110,8 @@ func _show(p: String) -> void:
 		"main":
 			list = [
 				["자유 이동 (모든 층·문 열림): " + _onoff(Game.dev_open), "open"],
+				["진행 단계... (지금: %d. %s)" % [Steps.current() + 1, Steps.STEPS[Steps.current()]["n"]], "page:steps"],
+				["다음 단계로 넘기기  (F4)", "next"], ["이전 단계로 되돌리기  (F5)", "prev"],
 				["방으로 이동...", "page:rooms"], ["챕터로 건너뛰기...", "page:chapters"], ["전투 시작...", "page:battles"],
 				["무적: " + _onoff(Game.dev_god), "god"], ["빠르게 걷기: " + _onoff(Game.dev_fast), "fast"],
 				["벽 통과: " + _onoff(Game.dev_noclip), "noclip"], ["정보 표시: " + _onoff(Game.dev_info), "info"],
@@ -113,6 +124,13 @@ func _show(p: String) -> void:
 			ids.sort()
 			for id in ids:
 				list.append(["%s  %s" % [id, all[id].get("name", "")], "room:" + id])
+		"steps":
+			var cur := Steps.current()
+			for i in Steps.STEPS.size():
+				var mark := "v " if Steps.is_done(i) else ("> " if i == cur else "  ")
+				list.append(["%s%2d. %s" % [mark, i + 1, Steps.STEPS[i]["n"]], "step:%d" % i])
+			sel = cur
+			top = maxi(0, cur - ROWS / 2)
 		"chapters":
 			for i in CHAPTERS.size():
 				list.append([CHAPTERS[i][0], "chapter:%d" % i])
@@ -181,6 +199,28 @@ func _pick(what: String) -> void:
 	sel = keep
 
 
+## 진행 단계 i 로: 앞 단계는 끝난 것으로 하고 그 단계의 시작 위치로 간다
+func goto_step(i: int) -> void:
+	i = clampi(i, 0, Steps.STEPS.size() - 1)
+	var s: Dictionary = Steps.STEPS[i]
+	Steps.apply(i)
+	Snd.play("select")
+	if s.has("event"):
+		main.busy += 1
+		await main.fade_to(1.0, 0.22)
+		await main.run_event(s["event"])
+		main.busy -= 1
+	else:
+		var at: Array = s["at"]
+		if at[1] is String:
+			await main.goto_room(at[0], at[1])
+		else:
+			await main.goto_at(at[0], Vector2i(at[1][0], at[1][1]))
+	if main.world:
+		main.world.refresh_actors()
+	main.toast("[개발] %d / %d  %s" % [i + 1, Steps.STEPS.size(), s["n"]])
+
+
 ## 챕터 시작 지점으로: 앞 챕터의 인증·보스 플래그를 켜고 그 층 복도로 간다
 func _jump(i: int) -> void:
 	for k in i + 1:
@@ -201,7 +241,7 @@ func _draw() -> void:
 	var r := Rect2(70, 36, 500, 408)
 	draw_rect(r, P.UI_BG)
 	draw_rect(r, P.UI_ACCENT_2, false, 3)
-	var heading: String = {"main": "개발자 메뉴", "rooms": "방으로 이동", "chapters": "챕터로 건너뛰기", "battles": "전투 시작"}[page]
+	var heading: String = {"main": "개발자 메뉴", "rooms": "방으로 이동", "chapters": "챕터로 건너뛰기", "battles": "전투 시작", "steps": "진행 단계 (v 끝남  > 지금)"}[page]
 	draw_string(f, Vector2(r.position.x + 16, r.position.y + 28), heading, HORIZONTAL_ALIGNMENT_LEFT, -1, Game.FL, P.UI_ACCENT_2)
 	draw_string(f, Vector2(r.position.x + 16, r.position.y + 28), "F1 닫기  X 뒤로", HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 32, Game.FS, P.UI_MUTED)
 	for i in range(top, mini(list.size(), top + ROWS)):

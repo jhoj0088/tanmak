@@ -84,17 +84,29 @@ static func _h(tx: int, ty: int, k: int) -> int:
 
 # ================================================================ 학교
 ## 바닥: terrazzo(복도, 광택 있는 인조석) / wood(교실 마루) / dark(컴퓨터실·천문대) / tile(급식실·화장실 타일) / grass(운동장)
+static var skip_floor := false   # 미리 그린 배경 위에 물건만 얹을 때 (바닥은 그리지 않는다)
+
+
 static func school_floor(ci: CanvasItem, r: Rect2, tx: int, ty: int, style: String) -> void:
+	if skip_floor:
+		return
 	var p := r.position
 	match style:
 		"roof":
-			# 옥상: 녹색 방수 페인트 바닥, 이음매와 배수 줄
-			var v := float(_h(tx, ty, 1) % 8) / 200.0
-			ci.draw_rect(r, P.BENCH_700.lightened(v))
-			ci.draw_rect(Rect2(p, Vector2(32, 1)), P.BENCH_700.darkened(0.2))
-			ci.draw_rect(Rect2(p, Vector2(1, 32)), P.BENCH_700.darkened(0.2))
-			if _h(tx, ty, 2) % 9 == 0:
-				ci.draw_circle(p + Vector2(10 + _h(tx, ty, 3) % 12, 18), 4, Color(P.SKY_300, 0.5))
+			# 옥상: 회색 보도블록 2x2 (사진 20250903 옥상 천문대), 줄눈과 빗물 얼룩
+			for sy in 2:
+				for sx in 2:
+					var q := p + Vector2(sx * 16, sy * 16)
+					var v := float(_h(tx * 2 + sx, ty * 2 + sy, 1) % 9) / 140.0
+					var base := Color("8f9296").lightened(v)
+					ci.draw_rect(Rect2(q, Vector2(16, 16)), base)
+					ci.draw_line(q + Vector2(0, 15.5), q + Vector2(16, 15.5), base.darkened(0.25), 1)
+					ci.draw_line(q + Vector2(15.5, 0), q + Vector2(15.5, 16), base.darkened(0.25), 1)
+					ci.draw_line(q + Vector2(0, 0.5), q + Vector2(15, 0.5), base.lightened(0.15), 1)
+					var hh := _h(tx * 2 + sx, ty * 2 + sy, 4)
+					ci.draw_rect(Rect2(q + Vector2(hh % 12 + 2, (hh / 13) % 12 + 2), Vector2(2, 1)), base.darkened(0.18))
+			if _h(tx, ty, 2) % 13 == 0:
+				ci.draw_circle(p + Vector2(10 + _h(tx, ty, 3) % 12, 18), 5, Color(P.SKY_300, 0.25))
 		"wood":
 			var base := P.WOOD_500 if (ty % 2 == 0) else P.WOOD_500.darkened(0.05)
 			ci.draw_rect(r, base)

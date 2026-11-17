@@ -113,6 +113,8 @@ const ROOMS := {
 		"where": {
 			"floor": "DORM",
 		},
+		"bg": "res://assets/rooms/dorm_hall.png",
+		"bg_oy": 64,
 	},
 
 	"dorm_room": {
@@ -156,6 +158,8 @@ const ROOMS := {
 		"where": {
 			"floor": "DORM",
 		},
+		"bg": "res://assets/rooms/dorm_room.png",
+		"bg_oy": 64,
 	},
 
 }

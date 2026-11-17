@@ -29,6 +29,10 @@ var cam: Camera2D
 var cooldown := 0.0
 var t := 0.0
 var inside := {}
+var bg: Texture2D = null      # 미리 그린 배경 그림 (tools/render_halls.py 가 그린 assets/halls/*.png, assets/rooms/*.png). 있으면 타일 대신 이 그림을 깐다
+var bg_oy := 0                # 그림 위쪽 여백 (맨 윗줄 벽 면이 맵 위로 올라가는 만큼)
+## 배경 그림에 이미 그려 둔 글자. 여기 없는 글자(움직이는 것: 별자리판, 노래방 기계)는 그림 위에 타일로 따로 그린다
+const BAKED := "#.=wbBjNFECuLQKAJpvSofgPls*_x^andTkcimZeWhtGz"
 
 
 func _ready() -> void:
@@ -42,6 +46,9 @@ func _ready() -> void:
 	theme = data.get("theme", "school")
 	floor_style = data.get("floor", "terrazzo")
 	doors = data.get("doors", {})
+	if data.has("bg") and ResourceLoader.exists(data["bg"]):
+		bg = load(data["bg"])
+		bg_oy = int(data.get("bg_oy", 0))
 
 	entities = Node2D.new()
 	entities.y_sort_enabled = true
@@ -170,7 +177,7 @@ func rect_blocked(r: Rect2) -> bool:
 
 
 func can_move() -> bool:
-	return not main.is_busy() and not main.dialogue.active and not main.menu.open and not main.dev_menu.open
+	return not main.is_busy() and not main.dialogue.active and not main.menu.open and not main.dev_menu.open and not main.minimap.big
 
 
 # ---------------------------------------------------------------- 문 / 발동 구역
@@ -309,6 +316,11 @@ func _draw() -> void:
 	if data.get("sky", false):
 		_draw_sky()
 	var vr := _vis()
+	if bg:
+		_draw_bg(vr)
+		_draw_labels()
+		_draw_plates()
+		return
 	for ty in range(vr.position.y, vr.end.y):
 		var row: String = grid[ty]
 		for tx in range(vr.position.x, vr.end.x):
@@ -325,6 +337,57 @@ func _draw() -> void:
 	if theme == "school":
 		_draw_labels()
 	_draw_plates()
+
+
+## 미리 그린 복도 그림 + 움직이는 것만 (불 켜진 교실 문, 잠긴 계단 셔터, 세이브 별)
+func _draw_bg(vr: Rect2i) -> void:
+	var dst := Rect2(vr.position.x * TILE, vr.position.y * TILE - 64, vr.size.x * TILE, vr.size.y * TILE + 64)
+	dst = dst.intersection(Rect2(Vector2(0, -bg_oy), bg.get_size()))
+	draw_texture_rect_region(bg, dst, Rect2(dst.position + Vector2(0, bg_oy), dst.size))
+	for ty in range(vr.position.y, vr.end.y):
+		var row: String = grid[ty]
+		for tx in range(vr.position.x, vr.end.x):
+			var c := row[tx]
+			var p := Vector2(tx * TILE, ty * TILE)
+			if c == "*":
+				Tiles.star(self, p + Vector2(16, 16), 8.0 + sin(t * 4.0) * 1.5, P.PILLAR_300, t)
+			elif not doors.has(c) and not BAKED.contains(c):
+				Tiles.skip_floor = true
+				Tiles.draw(self, theme, c, Rect2(p, Vector2(TILE, TILE)), tx, ty, floor_style, t)
+				Tiles.skip_floor = false
+			elif doors.has(c):
+				var d: Dictionary = doors[c]
+				if d.get("style", "door") == "stairs" and door_blocked(d):
+					# 계단 셔터 (내려와 있다)
+					var sr := Rect2(p + Vector2(0, -26), Vector2(TILE, 58))
+					draw_rect(sr, P.GRANITE_700)
+					for i in 10:
+						draw_line(sr.position + Vector2(0, i * 5.8 + 2), sr.position + Vector2(TILE, i * 5.8 + 2), P.INLAY_900, 1)
+					draw_rect(Rect2(sr.position, Vector2(TILE, 3)), P.INLAY_900)
+					if grid[ty][tx - 1] != c:
+						var blink := 0.5 + 0.5 * sin(t * 4.0)
+						draw_rect(Rect2(p + Vector2(26, -6), Vector2(8, 8)), Color(P.SIGNAL, 0.4 + 0.6 * blink))
+				elif d.has("glow") and grid[ty][tx - 1] != c:
+					# 불이 새는 교실: 문의 세로 유리창과 채광창이 빛난다
+					var gc: Color = d["glow"]
+					gc.a = 0.55 + 0.35 * sin(t * 3.0)
+					draw_rect(Rect2(p + Vector2(8, -7), Vector2(4, 18)), gc)
+					draw_rect(Rect2(p + Vector2(5, -23), Vector2(TILE - 7, 9)), Color(gc, gc.a * 0.6))
+
+
+## 미리 그린 그림에서 키 큰 물건(기둥·자판기·화분)은 주인공이 그 뒤에 있을 때 주인공 위에 다시 그린다
+func _draw_tall_over(ci: CanvasItem) -> void:
+	if bg == null or player == null:
+		return
+	var pf: Vector2 = player.position
+	var ptx := int(pf.x / TILE)
+	var pty := int(pf.y / TILE)
+	for ty in range(pty, mini(h, pty + 3)):
+		for tx in range(maxi(0, ptx - 1), mini(w, ptx + 2)):
+			var c: String = grid[ty][tx]
+			if c in "JvpkLAQWmZG" and pf.y < ty * TILE + 18:
+				var r := Rect2(tx * TILE + 2, ty * TILE - 58, TILE - 4, 58 + 26)
+				ci.draw_texture_rect_region(bg, r, Rect2(r.position + Vector2(0, bg_oy), r.size))
 
 
 ## 옥상의 밤하늘 (방 데이터 "sky": true)
@@ -374,7 +437,7 @@ func _draw_labels() -> void:
 				var tw := f.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, Game.FS).x + 8
 				var cx := tx * TILE + run * TILE / 2.0
 				var above: bool = doors[c].get("label_below", false) == false
-				var py := ty * TILE - 15.0 if above else ty * TILE + TILE + 1.0
+				var py := (ty * TILE - (58.0 if bg else 15.0)) if above else ty * TILE + (TILE + 1.0 if not bg else 15.0)
 				var pr := Rect2(cx - tw / 2.0, py, tw, 15)
 				draw_rect(pr, P.PAPER)
 				draw_rect(pr, P.INLAY_900, false, 1)
@@ -387,11 +450,12 @@ func _draw_labels() -> void:
 			var start := row2.find("B")
 			if start >= 0:
 				var end := row2.rfind("B")
-				draw_string(f, Vector2(start * TILE, ty * TILE + 19), board, HORIZONTAL_ALIGNMENT_CENTER, (end - start + 1) * TILE, Game.FS, P.PAPER)
+				draw_string(f, Vector2(start * TILE, ty * TILE + (-6 if bg else 19)), board, HORIZONTAL_ALIGNMENT_CENTER, (end - start + 1) * TILE, Game.FS, P.PAPER)
 
 
 func draw_overhead(ci: CanvasItem) -> void:
 	var f: Font = Game.font
+	_draw_tall_over(ci)
 	if theme == "forest":
 		for ty in h:
 			var row: String = grid[ty]

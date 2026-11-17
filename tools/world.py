@@ -18,7 +18,7 @@ R = {k: copy.deepcopy(v["data"]) for k, v in BASE.items()}
 FILE_OF = {k: os.path.basename(v["file"]) for k, v in BASE.items()}
 
 SOLID = {
-    "school": "#=wbLBTdckptmeo*hvWASqPNFECQIiZjGyzK~OHVrYuMXJnagf",
+    "school": "#=wbLBTdckptmeo*hvWASqPNFECQIiZjGyzK~OHVrYuMXJnagfls",
     "forest": "#^~rgu*",
     "bio": "#onv~g*",
     "optics": "#mlesg*",
@@ -333,6 +333,14 @@ def build_hall(hid, fl):
     for x in (S_X[0] + 6, 62, 91):
         if g[S_Y[1] + 1][x] == "L":
             g[S_Y[1] + 1][x] = "Q"
+    # 분리수거함 (사진: 회색 통에 노랑·파랑·초록 뚜껑, 벽을 따라 줄지어) - 화장실 옆, 중앙 홀 입구
+    for x in (56, 57, 69):
+        if g[S_Y[0]][x] == "." and g[S_Y[0] - 1][x] in "=wb":
+            g[S_Y[0]][x] = "l"
+    if fl == "2F":
+        # 2층 사진: 중앙 홀 동쪽 넓은 곳의 탁구대
+        for x, y in ((100, 36), (100, 40)):
+            g[y][x] = "s"
     # 안내도 (중앙 홀 위쪽 벽, 계단 옆)
     g[31][89] = g[31][90] = "b"
     g[HUB[1]][HUB[2]] = "v"     # 자판기
@@ -348,7 +356,8 @@ def build_hall(hid, fl):
         for x in (85, 86):
             for y in (40, 41):
                 g[y][x] = "^"
-        g[38][90] = "P"
+        for x, y in ((90, 38), (91, 38), (90, 39), (91, 39)):
+            g[y][x] = "P"      # 덮개 씌운 그랜드 피아노 (2x2칸)
         for x in range(91, 94):
             if g[31][x] in "=wb":
                 g[31][x] = "A"
@@ -360,7 +369,7 @@ def build_hall(hid, fl):
                 g[S_Y[0]][x] = c
         sg.update({
             "J": ["* 노랗게 칠한 둥근 기둥이다. 3층 천장까지 곧게 올라간다.", "* 기둥 아래에 누가 붙여 놓은 포스트잇: '여기서 만나 - 7시'."],
-            "^": ["* 바닥에 짙은 돌로 박아 넣은 마름모 무늬다.", "* 신입생 때 다들 이 위에 서서 사진을 찍었다."],
+            "^": ["* 바닥에 적갈색과 검정 돌로 박아 넣은 커다란 세모 무늬다. 위층의 세모난 난간과 꼭 같은 모양이다.", "* 신입생 때 다들 이 위에 서서 사진을 찍었다."],
             "A": ["* 'HALL OF FAME'. 졸업생들의 수상 기록이 벽 한가득 걸려 있다.", "* 'Pioneering · Creative · Versatile · Humane'.", "* 그 아래 작게: '드높은 이상, 드넓은 창발'."],
             "K": ["* SASA 로고가 새겨진 낮은 돌이다. 'Sejong Academy of Science and Arts'."],
             "f": ["* 분홍 스웨터를 입은 커다란 곰 인형이다. 옆에 빨간 우체통이 있다. 'POST'.", "* 곰이 S110 앞을 지키고 있다. 밤에도 퇴근하지 않는 것 같다."],
@@ -419,7 +428,11 @@ def build_hall(hid, fl):
             a["pos"] = [44, S_Y[0] + 1]
         actors.append(a)
     new = dict(old)
-    new.update({"map": rows, "doors": doors, "spawns": sp, "signs_at": at, "actors": actors, "plates": plates, "signs": sg})
+    sg.setdefault("l", ["* 분리수거함이다. 노랑은 플라스틱, 파랑은 종이, 초록은 캔.", "* 맨 끝 통 위에 '컵라면 국물 버리지 마세요!!'가 붙어 있다."])
+    sg.setdefault("s", ["* 탁구대다. 'CHAMPION'. 네트가 조금 처져 있다.", "* 쉬는 시간마다 2층에서 딱, 딱 소리가 나던 곳이다."])
+    new = dict(new)
+    new.update({"map": rows, "doors": doors, "spawns": sp, "signs_at": at, "actors": actors, "plates": plates, "signs": sg,
+                "bg": "res://assets/halls/%s.png" % hid})
     return new
 
 
@@ -790,6 +803,7 @@ FILE_OF["roof_dome"] = "rooms_ch5.gd"
 epi = R["epi_hall"]
 f5 = R["f5_hall"]
 epi["map"] = [row.replace("*", ".") for row in f5["map"]]
+epi["bg"] = f5["bg"]
 nd = {}
 for c, d in f5["doors"].items():
     if c in epi["doors"]:
@@ -931,6 +945,12 @@ if not ok:
     sys.exit("FIX")
 
 
+# 실내 학교 방은 미리 그린 배경 그림을 쓴다 (tools/render_halls.py)
+for rid, r in R.items():
+    if r.get("theme", "school") == "school" and rid not in {"yard", "garden", "roof", "roof_dome", "epi_hall"} and rid not in dict(FLOORS).values():
+        r["bg"] = "res://assets/rooms/%s.png" % rid
+        r["bg_oy"] = 64
+
 # ------------------------------------------------------------------ 쓰기
 def gd(v, ind=1):
     t = "\t" * ind
@@ -973,6 +993,22 @@ for f, ids in files.items():
     out.append("}")
     open(os.path.join(ROOT, "data", f), "w").write("\n".join(out) + "\n")
     order.append(f)
+# 복도 배경 그림용 자료 (tools/render_halls.py 가 읽어서 assets/halls/*.png 를 그린다)
+halls_out = {}
+for fl, hid in FLOORS:
+    halls_out[hid] = {"fl": fl, "map": R[hid]["map"],
+                      "doors": {c: {k: d.get(k) for k in ("label", "style", "locked", "event", "to") if k in d} for c, d in R[hid]["doors"].items()}}
+# 교실 등 실내 학교 방 (옥상·운동장·정원·복도 제외): assets/rooms/<id>.png
+OUTDOOR = {"yard", "garden", "roof", "roof_dome", "epi_hall"}
+rooms_out = {}
+for rid, r in R.items():
+    if r.get("theme", "school") != "school" or rid in OUTDOOR or rid in dict(FLOORS).values():
+        continue
+    rooms_out[rid] = {"map": r["map"], "floor": r.get("floor", "terrazzo"),
+                      "doors": {c: {k: d.get(k) for k in ("label", "style", "locked", "event", "to") if k in d} for c, d in r.get("doors", {}).items()}}
+halls_out["_rooms"] = rooms_out
+halls_out["_plan"] = {"S_Y": S_Y, "S_X": S_X, "HUB": HUB, "HUB_COL": HUB_COL, "TRI": TRI, "STAIRS": STAIRS, "TOILET_X": TOILET_X}
+json.dump(halls_out, open(os.path.join(HERE, "halls.json"), "w"), ensure_ascii=False)
 # 미니맵용 평면 (복도 맵 칸 좌표)
 plan = {
     "w": HW, "h": HH,

@@ -85,6 +85,12 @@ func _ready() -> void:
 			_load_room(parts[0], parts[1] if parts.size() > 1 else "")
 			fade_to(0.0, 0.3)
 			return
+		if a.begins_with("step="):
+			# step=12 : 개발자 진행 단계 12번째에서 시작 (scripts/ui/dev_steps.gd)
+			Game.dev = true
+			fade.modulate.a = 1.0
+			dev_menu.goto_step(int(a.substr(5)) - 1)
+			return
 		if a.begins_with("battle="):
 			_load_room("f5_hall", "start")
 			_dev_battle(a.substr(7))
@@ -168,6 +174,21 @@ func goto_room(id: String, spawn: String) -> void:
 	busy += 1
 	await fade_to(1.0, 0.22)
 	_load_room(id, spawn)
+	await fade_to(0.0, 0.22)
+	var ev: String = world.data.get("on_enter", "")
+	if ev != "":
+		await run_event(ev)
+	busy -= 1
+
+
+## 칸 좌표로 바로 이동 (개발자 모드의 진행 단계 이동용). 방의 on_enter 이벤트도 실행한다.
+func goto_at(id: String, tile: Vector2i, face := 1) -> void:
+	busy += 1
+	await fade_to(1.0, 0.22)
+	_load_room(id, "")
+	world.player.position = world.feet_of(tile.x, tile.y)
+	world.player.facing = face
+	world.player.last_safe = world.player.position
 	await fade_to(0.0, 0.22)
 	var ev: String = world.data.get("on_enter", "")
 	if ev != "":

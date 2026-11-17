@@ -51,6 +51,8 @@ const ROOMS := {
 			"floor": "4F",
 			"pos": [49, 16],
 		},
+		"bg": "res://assets/rooms/a4_karaoke.png",
+		"bg_oy": 64,
 	},
 
 	"a4_mac": {
@@ -97,6 +99,8 @@ const ROOMS := {
 			"floor": "4F",
 			"pos": [95, 31],
 		},
+		"bg": "res://assets/rooms/a4_mac.png",
+		"bg_oy": 64,
 	},
 
 }

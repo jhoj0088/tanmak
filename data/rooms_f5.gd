@@ -44,6 +44,8 @@ const ROOMS := {
 			"floor": "5F",
 			"pos": [40, 10],
 		},
+		"bg": "res://assets/rooms/a5_club.png",
+		"bg_oy": 64,
 	},
 
 	"s5_math_class": {
@@ -93,6 +95,8 @@ const ROOMS := {
 			"floor": "5F",
 			"pos": [54, 33],
 		},
+		"bg": "res://assets/rooms/s5_math_class.png",
+		"bg_oy": 64,
 	},
 
 	"s5_math_office": {
@@ -149,6 +153,8 @@ const ROOMS := {
 			"floor": "5F",
 			"pos": [14, 54],
 		},
+		"bg": "res://assets/rooms/s5_math_office.png",
+		"bg_oy": 64,
 	},
 
 	"s5_multimedia": {
@@ -212,6 +218,8 @@ const ROOMS := {
 			"floor": "5F",
 			"pos": [51, 13],
 		},
+		"bg": "res://assets/rooms/s5_multimedia.png",
+		"bg_oy": 64,
 	},
 
 	"s5_observatory": {
@@ -255,6 +263,8 @@ const ROOMS := {
 			"floor": "5F",
 			"pos": [65, 49],
 		},
+		"bg": "res://assets/rooms/s5_observatory.png",
+		"bg_oy": 64,
 	},
 
 }

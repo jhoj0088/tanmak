@@ -82,6 +82,7 @@ var beat_clock := 0.0
 var beat_i := 0
 var beat_hit := false
 var beat_frac := 0.0
+var dev_autowin := false       # 개발자 모드 F4: 다음 내 차례에 바로 살려 주고 끝낸다
 var force_end := ""            # 적 스크립트가 "spared" 를 넣으면 전투가 그 결과로 끝난다
 var ui_hide := {}              # 최종전 연출: "hp", "gauge", "border" 를 넣으면 그 UI 가 사라진다
 var hits_this_attack := 0
@@ -138,8 +139,14 @@ func _battle_loop() -> String:
 
 
 func _player_turn() -> String:
+	if dev_autowin:
+		await _spare()
+		return "spared"
 	while true:
 		var b: int = await _pick_button()
+		if b == -2:
+			await _spare()
+			return "spared"
 		match b:
 			0:
 				# 공격 막대가 움직이는 동안 X 를 누르면 공격을 취소하고 메뉴로 돌아간다 (자비 등으로 바꿀 수 있다)
@@ -372,6 +379,17 @@ func _dev_keys() -> void:
 	elif Input.is_action_just_pressed("dev_win"):
 		enemy.hp = mini(enemy.hp, 1)
 		Snd.play("correct")
+	elif Input.is_action_just_pressed("dev_next"):
+		# 전투 바로 끝내기: 탄을 지우고 공격을 끝낸 뒤, 다음 내 차례에 살려 주고 끝난다
+		dev_autowin = true
+		enemy.spareable = true
+		bullets.clear()
+		lasers.clear()
+		if mode == "attack":
+			attack_t = attack_len
+		Snd.play("correct")
+		if mode == "menu":
+			step.emit(-2)   # 메뉴에서 기다리는 중이면 바로 '살려 주기'로
 
 
 ## 하트에게 피해를 준다 (무적 시간 중이면 무시)
