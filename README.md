@@ -23,6 +23,13 @@ Godot 4.3 이상. **Chapter 1~6과 엔딩 3종(노멀/배드/트루)** 까지 �
 - **Windows: `PLAY.cmd` 더블클릭.** 컴퓨터에서 Godot 4.3 을 찾아 바로 게임을 띄운다. 없으면 공식 Godot 4.3(약 60MB)을 받을지 묻고, 받은 것은 `%LOCALAPPDATA%\TanmakRPG\godot` 에 두고 다음부터 다시 쓴다. 처음 한 번은 리소스를 불러오느라 몇 초 더 걸린다. 편집기로 열려면 `EDIT.cmd`.
 - 직접 열기: Godot 실행 → **가져오기(Import)** → 이 폴더의 `project.godot` → **F5**
 
+## 설치 없이 하기
+
+- **웹**: https://jhoj0088.github.io/tanmak/ (gh-pages 브랜치. 크롬·엣지 권장, 처음 열 때 40MB 정도 받는다)
+- **Windows 프로그램**: `TanmakRPG.exe` 한 파일 (그림·소리가 안에 다 들어 있다). 처음 실행할 때 Windows가 '알 수 없는 게시자'라고 막으면 '추가 정보 → 실행'.
+- 새로 만들기: Godot 4.3 내보내기 템플릿을 설치하고 `godot --headless --export-release "Web" build/web/index.html`,
+  `godot --headless --export-release "Windows" build/windows/TanmakRPG.exe` (export_presets.cfg 에 설정이 있다)
+
 ## 조작
 
 | 키 | 기능 |
